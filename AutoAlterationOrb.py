@@ -32,23 +32,23 @@ running = False
 
 # ---------------- Core functions ----------------
 
+
 def extract_item_name(text):
-    lines = text.splitlines()
-    capture = False
-    extracted = []
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
 
-    for line in lines:
-        if line.startswith("Rarity:") or line.startswith("稀有度:"):
-            capture = True
-            continue
+    for i, line in enumerate(lines):
+        # First colon line is usually "Rarity:", "稀 有 度:", etc.
+        if ":" in line or "：" in line:
+            name_lines = []
 
-        if line.strip() == "--------" and capture:
-            break
+            for j in range(i + 1, len(lines)):
+                if lines[j] == "--------":
+                    break
+                name_lines.append(lines[j])
 
-        if capture:
-            extracted.append(line)
+            return " ".join(name_lines)
 
-    return "".join(line.lstrip() for line in extracted)
+    return ""
 
 
 def log(message):
@@ -129,6 +129,7 @@ def run_script():
                 break
 
             raw_text = pyperclip.paste()
+            raw_text = raw_text.replace("：", ":")
             item_name = extract_item_name(raw_text)
 
             matched = compiled_regex.search(raw_text)
