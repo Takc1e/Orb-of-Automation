@@ -6,15 +6,33 @@ import pyperclip
 import time
 import re
 import threading
+import ctypes
+
+# ---------------- Hotkey key codes ----------------
+
+VK_ESCAPE = 0x1B
+VK_F7 = 0x76
+VK_F8 = 0x77
+
+
+def key_pressed(vk_code):
+    return ctypes.windll.user32.GetAsyncKeyState(vk_code) & 0x8000
+
+
+# ---------------- Speed settings ----------------
 
 pyautogui.PAUSE = 0
 
 COPY_DELAY = 0.015
 CLICK_DELAY = 0.005
+AUGMENT_DELAY = 0.02
+CTRL_HOLD_DELAY = 0.005
 ITERATION_DELAY = 0.02
 
 running = False
 
+
+# ---------------- Core functions ----------------
 
 def extract_item_name(text):
     lines = text.splitlines()
@@ -43,8 +61,13 @@ def log(message):
 def stop_script():
     global running
     running = False
-    pyautogui.keyUp("shift")
-    pyautogui.keyUp("ctrl")
+
+    try:
+        pyautogui.keyUp("shift")
+        pyautogui.keyUp("ctrl")
+    except:
+        pass
+
     log("Stopped. Ready again.")
 
 
@@ -83,8 +106,17 @@ def run_script():
 
     try:
         while running and attempts < safety_limit:
+
+            if key_pressed(VK_ESCAPE) or key_pressed(VK_F7) or key_pressed(VK_F8):
+                log("Emergency key pressed. Stopping.")
+                break
+
             pyautogui.hotkey("ctrl", "c")
             time.sleep(COPY_DELAY)
+
+            if key_pressed(VK_ESCAPE) or key_pressed(VK_F7) or key_pressed(VK_F8):
+                log("Emergency key pressed. Stopping.")
+                break
 
             raw_text = pyperclip.paste()
             item_name = extract_item_name(raw_text)
@@ -104,14 +136,14 @@ def run_script():
             time.sleep(CLICK_DELAY)
 
             if ctrl_click_enabled:
-                    time.sleep(0.02)  # 👈 slight delay before augment
+                time.sleep(AUGMENT_DELAY)
 
-                    try:
-                        pyautogui.keyDown("ctrl")
-                        time.sleep(0.005)
-                        pyautogui.click()
-                    finally:
-                        pyautogui.keyUp("ctrl")
+                try:
+                    pyautogui.keyDown("ctrl")
+                    time.sleep(CTRL_HOLD_DELAY)
+                    pyautogui.click()
+                finally:
+                    pyautogui.keyUp("ctrl")
 
             attempts += 1
             time.sleep(ITERATION_DELAY)
@@ -123,18 +155,22 @@ def run_script():
         running = False
         pyautogui.keyUp("shift")
         pyautogui.keyUp("ctrl")
-        log("Ready again. Press Shift+= to start.")
+        log("Ready again. Press F6 to start.")
 
 
 def start_thread():
     threading.Thread(target=run_script, daemon=True).start()
 
 
+# ---------------- UI ----------------
+
 root = tk.Tk()
-root.title("PoE Regex Roller")
+root.title("AutoAlterationOrb")
 root.geometry("700x470")
 
-tk.Label(root, text="Regex to match full copied item text:").pack(anchor="w", padx=10, pady=(10, 0))
+tk.Label(root, text="Item Regex:").pack(
+    anchor="w", padx=10, pady=(10, 0)
+)
 
 regex_entry = tk.Entry(root, width=85)
 regex_entry.pack(padx=10, pady=5)
@@ -149,23 +185,24 @@ ctrl_click_var = tk.BooleanVar()
 
 tk.Checkbutton(
     root,
-    text="Enable extra Ctrl + Left Click after normal click",
+    text="Always Use Augment Orb",
     variable=ctrl_click_var
 ).pack(anchor="w", padx=10, pady=5)
 
 tk.Label(
     root,
-    text="Hotkeys: Shift+= Start | Shift+- Stop | Esc Emergency Stop"
+    text="Hotkeys: F6 Start | F7 Stop | F8 Emergency Stop | Esc Emergency Stop"
 ).pack(pady=5)
 
 output_box = scrolledtext.ScrolledText(root, width=85, height=20)
 output_box.pack(padx=10, pady=10)
 
-log("Ready. Enter regex, set mode, then use Shift+= in game.")
+log("Ready. Enter regex, set mode, then use F6 in game.")
 
-keyboard.add_hotkey("shift+=", start_thread)
-keyboard.add_hotkey("shift+-", stop_script)
-keyboard.add_hotkey("esc", stop_script, suppress=False)
-keyboard.add_hotkey("shift+esc", stop_script, suppress=False)
+# ---------------- Global hotkeys ----------------
+
+keyboard.add_hotkey("f6", start_thread, suppress=False)
+keyboard.add_hotkey("f7", stop_script, suppress=False)
+keyboard.add_hotkey("f8", stop_script, suppress=False)
 
 root.mainloop()
