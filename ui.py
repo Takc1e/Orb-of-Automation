@@ -69,7 +69,7 @@ class AutoAlterationOrbApp:
 
         tk.Label(
             self.item_tab,
-            text="Example:\nof the prodigy | meteor\nincreased effect of tailwind | onslaught\nAll Languages supported",
+            text="e.g. \nof the prodigy | meteor\nincreased effect of tailwind | onslaught\n强大的|奇才之\n提速尾流|中毒\nAll Languages supported",
             justify="left",
             anchor="w",
         ).pack(anchor="w", padx=10, pady=(10, 0))
@@ -85,7 +85,7 @@ class AutoAlterationOrbApp:
 
         tk.Label(
             self.map_tab,
-            text='PoE-style unwanted regex e.g. "!ur$|h vu|ot i"',
+            text='e.g. "!ur$|h vu|ot i","Block|reflect|regen", "焚界者符文|反射|无法回复"',
             anchor="w",
         ).pack(anchor="w", padx=10)
 
