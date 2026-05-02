@@ -25,11 +25,11 @@ class Roller:
         self.running = False
         self.log = log_callback
 
-        self.copy_delay_base = 0.08
-        self.click_delay_base = 0.02
-        self.augment_delay_base = 0.02
-        self.shortcut_hold_delay_base = 0.02
-        self.iteration_delay_base = 0.02
+        self.copy_delay_base = 0.12
+        self.click_delay_base = 0.03
+        self.augment_delay_base = 0.04
+        self.shortcut_hold_delay_base = 0.03
+        self.iteration_delay_base = 0.08
 
     def key_pressed(self, vk_code):
         return ctypes.windll.user32.GetAsyncKeyState(vk_code) & 0x8000
@@ -65,6 +65,7 @@ class Roller:
         }
 
     def copy_item_text(self, copy_delay: float) -> str:
+        time.sleep(0.03)
         pyautogui.hotkey("ctrl", "c")
         time.sleep(copy_delay)
 
