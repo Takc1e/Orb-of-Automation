@@ -2,26 +2,18 @@
 Orb of Alteration automation tool for Path of Exile 1  
 Reads item data from the clipboard (Ctrl + C) instead of game files which is not against GGG T&C :)   
 
+# Useage 
+1. Run **Orb of Automation.exe** as **Administrator** (Important)
 
-
-# Requirements
-
-Python 3.8+
-Windows OS (uses WinAPI for key detection)
-
+or if using python 3.8+: 
 Install dependencies:
 ```bash
 pip install pyautogui keyboard pyperclip
 ```
-
-
-
-# Useage 
-1. Run the script:
+Then Run the script:
 ```bash
 python OrbOfAutomation.py
 ```
-or run Orb of Automation.exe as Administrator (Important)
 
 2. Key in item regex ( same format in POE, Supports all languages) and set up accordingly
 ![alt text](Demo_item.png)
