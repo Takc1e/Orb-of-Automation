@@ -318,7 +318,7 @@ class Roller:
                     self.log("F7 pressed. Stopping.")
                     break
 
-                raw_text = self.copy_cluster_item_text(delays["copy"])
+                raw_text = self.copy_item_text(delays["copy"])
 
                 if self.key_pressed(VK_F7):
                     self.log("F7 pressed. Stopping.")
