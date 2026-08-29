@@ -268,7 +268,8 @@ class AutoAlterationOrbApp:
         if item_position:
             pyautogui.moveTo(item_position[0], item_position[1])
 
-        pyautogui.hotkey("ctrl", "c")
+        pyautogui.keyUp("shift")
+        pyautogui.hotkey("ctrl", "alt", "c")
         self.root.after(150, self.finish_preview_copied_item_text)
 
     def finish_preview_copied_item_text(self):

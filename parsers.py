@@ -39,16 +39,21 @@ def parse_item_mod_lines(text: str) -> list:
     Best-effort parser for explicit copied item mods.
 
     It ignores item metadata, requirements, enchant lines, and reminder text.
-    Cluster jewel explicit mods are copied as plain stat lines between
-    separator blocks, so preserving the original line is more useful than
-    trying to classify prefix/suffix here.
+    Cluster jewel explicit mods may be copied as plain stat lines or as
+    Ctrl+Alt+C modifier-detail rows like:
+        { Fractured Prefix Modifier "Powerful" (Tier: 1) }
+    Preserving the original line is more useful than trying to classify
+    prefix/suffix here.
     """
     ignored_prefixes = (
         "物品类别",
+        "物品類別",
         "稀 有 度",
         "需求",
         "等级",
+        "等級",
         "物品等级",
+        "物品等級",
         "Item Class",
         "Rarity",
         "Requirements",
@@ -62,7 +67,9 @@ def parse_item_mod_lines(text: str) -> list:
     }
     description_markers = (
         "放入天赋树",
+        "放入天賦樹",
         "可以右键点击",
+        "可以右鍵點擊",
         "Place into an allocated",
         "Right click to remove",
     )
@@ -72,14 +79,21 @@ def parse_item_mod_lines(text: str) -> list:
 
     for raw_line in text.splitlines():
         line = raw_line.strip()
+        line_without_markdown = line.lstrip("#").strip()
 
         if not line:
             continue
 
-        if line == item_name or line in ignored_exact:
+        if re.fullmatch(r"-{2,}", line):
             continue
 
-        if line.startswith(ignored_prefixes):
+        if line == item_name or line_without_markdown == item_name:
+            continue
+
+        if line in ignored_exact or line_without_markdown in ignored_exact:
+            continue
+
+        if line.startswith(ignored_prefixes) or line_without_markdown.startswith(ignored_prefixes):
             continue
 
         if any(marker in line for marker in description_markers):
@@ -89,9 +103,13 @@ def parse_item_mod_lines(text: str) -> list:
             continue
 
         looks_like_mod = (
-            "+" in line
+            line.startswith("{")
+            or "+" in line
             or "%" in line
             or "(fractured)" in line.lower()
+            or "Modifier" in line
+            or "属性" in line
+            or "屬性" in line
             or re.search(r"\d", line)
         )
 

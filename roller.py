@@ -16,6 +16,7 @@ from parsers import (
 from regex_utils import clean_poe_regex, compile_regex
 
 
+VK_SHIFT = 0x10
 VK_F7 = 0x76
 
 pyautogui.PAUSE = 0
@@ -72,6 +73,21 @@ class Roller:
         time.sleep(0.03)
         pyautogui.hotkey("ctrl", "c")
         time.sleep(copy_delay)
+
+        raw_text = pyperclip.paste()
+        return normalize_text(raw_text)
+
+    def copy_cluster_item_text(self, copy_delay: float) -> str:
+        shift_was_down = bool(self.key_pressed(VK_SHIFT))
+
+        try:
+            pyautogui.keyUp("shift")
+            time.sleep(0.03)
+            pyautogui.hotkey("ctrl", "alt", "c")
+            time.sleep(copy_delay)
+        finally:
+            if shift_was_down:
+                pyautogui.keyDown("shift")
 
         raw_text = pyperclip.paste()
         return normalize_text(raw_text)
@@ -302,7 +318,7 @@ class Roller:
                     self.log("F7 pressed. Stopping.")
                     break
 
-                raw_text = self.copy_item_text(delays["copy"])
+                raw_text = self.copy_cluster_item_text(delays["copy"])
 
                 if self.key_pressed(VK_F7):
                     self.log("F7 pressed. Stopping.")
